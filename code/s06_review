@@ -74,8 +74,8 @@ Draw a triangle like this (size = 5)
 #####
 """
 
-def draw_triangle(size):
-    for i in range(size):
-        print(" " * (size - i) + "#" * (i+1))
+def draw_triangle(n):
+    for i in range(n):
+        print(" " * (n - i) + "#" * (i+1))
 
 draw_triangle(5)
