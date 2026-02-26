@@ -1,5 +1,5 @@
-# for i in range(5):
-#    print(i)
+for i in range(5):
+   print(i)
 
 #  = 0
 # while i < 5:
