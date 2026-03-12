@@ -3,8 +3,7 @@ import random
 # Bankroll = cash the player has to bet with
 bankroll = 1000
 
-
-## function to take bet
+## function to  take bet
 def take_bet():
     while True:
         bet = int(input("How much do you want to bet? "))
@@ -107,6 +106,11 @@ while True:
         elif dice_game == "2":
 
             guess = int(input("Guess the dice roll (1-6): "))
+
+            if guess < 1 or guess > 6:
+                print("Invalid guess. Please try again.")
+                continue
+
             dice_roll = random.randint(1, 6)
 
             print("The dice roll result is: ", dice_roll)
@@ -176,7 +180,7 @@ while True:
             else:
                 result = "Odd"
 
-            print("The roulette spin result is: ", result)
+            print("The roulette spin result is: ", roulette_spin, result)
 
             if odd_even_choice == result:
                 print("You win!")

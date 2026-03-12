@@ -24,11 +24,13 @@ def is_valid(word, letters, required):
 
 def find_words(letters, required):
     """print all valid words"""
+    valid_words = []
     with open("data/words.txt") as word_file:
         for word in word_file:
             word = word.strip()
             if is_valid(word, letters, required):
-                print(word)
+                valid_words.append(word)
+        return valid_words
 
 
 def main():
