@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from stocks import get_price
+#from stocks import get_price
 
 app = Flask(__name__)
 
@@ -28,7 +28,7 @@ def square(number):
 # create another route that shows the current price of any stock or current temperature of any city
 # /weather/<city>
 # /stock/<ticker>
-
+"""
 @app.route("/stock/<ticker>")
 def stock(ticker):
     price = get_price(ticker)
@@ -47,6 +47,6 @@ def ticker_post():
         return f"The current price of {ticker.upper()} is ${price:.2f}."
     except Exception as e:
         return f"This ticker symbol {ticker.upper()} is not valid. Please try again."
-
+"""
 if __name__ == "__main__":
     app.run(debug=True)
