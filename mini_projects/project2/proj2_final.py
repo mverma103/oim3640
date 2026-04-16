@@ -26,6 +26,12 @@ adlibs = [
 ]
 
 
+def get_song_name(filename):
+    song_name = filename.split("/")[-1]
+    song_name = song_name.replace(".txt", "")
+    return song_name
+
+
 def load_file(filename):
     file = open(filename)
     text = file.read()
@@ -79,14 +85,16 @@ def analyze_lyrics(filename, stop_words, adlibs):
     unique_words = len(word_count)
     vocab_richness = unique_words / total_words
 
-    print("\nSong:", filename)
+    song_name = get_song_name(filename)
+
+    print("\nSong:", song_name)
     print("Total words:", total_words)
     print("Unique words:", unique_words)
     print("Vocabulary richness:", round(vocab_richness, 2))
     print("Vocabulary richness means the percentage of unique words in the song.")
     print("A higher value suggests the song uses a wider variety of words.")
-    print("\nTop 10 words:")
 
+    print("\nTop 10 words:")
     top_10_words = top_words(word_count, 10)
     for word in top_10_words:
         print(word, ":", word_count[word])
@@ -102,13 +110,15 @@ def compare_songs(song_results):
     for song in song_results:
         filename = song[0]
         richness = song[3]
-        print(filename, "- Vocabulary richness:", round(richness, 2))
+        song_name = get_song_name(filename)
+
+        print(song_name, "- Vocabulary richness:", round(richness, 2))
 
         if richness > highest_song[3]:
             highest_song = song
 
     print("\nSong with the most diverse vocabulary:")
-    print(highest_song[0])
+    print(get_song_name(highest_song[0]))
 
 
 def graph_vocab_richness(song_results):
@@ -116,7 +126,7 @@ def graph_vocab_richness(song_results):
     richness_values = []
 
     for song in song_results:
-        song_names.append(song[0])
+        song_names.append(get_song_name(song[0]))
         richness_values.append(song[3])
 
     plt.bar(song_names, richness_values)
@@ -131,6 +141,7 @@ def main():
     print("Welcome to the Lyrics Analysis App")
     print("This program analyzes song lyrics by cleaning text, removing stop words and adlibs,")
     print("and comparing vocabulary richness across songs.")
+    print('\nEnter each song file path like this: mini_projects/project2/no_idea.txt')
 
     num_songs = int(input("\nHow many songs would you like to analyze? "))
 
