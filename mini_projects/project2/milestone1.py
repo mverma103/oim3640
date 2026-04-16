@@ -39,6 +39,7 @@ Notes for next milestone:
 - pretty simple and will need more data
 
 - when I ran this code, I get a pretty unfiltered list, which includes common words and adlibs that would need to be filtered
+- also, words with punctuation attachted to them are counted as different words, so I would need to filter out the punctuation
 - I can create a list of stop words (common words that I want to ignore) and filter out the words in that list from our word count
 - I can also filter out adlibs by creating a list of adlibs and either ignoring those words as well or making another analysis out of it
 - I can also create a list of words that I want to specifically analyze, such as words related to 

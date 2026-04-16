@@ -1,0 +1,31 @@
+from openai import OpenAI
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+client = OpenAI()
+
+conversation = []
+
+print("Chatbot started! Type 'exit' to quit.\n")
+
+while True:
+    user_input = input("You: ")
+
+    if user_input.lower() == "exit":
+        break
+
+    # Add user message to history
+    conversation.append({"role": "user", "content": user_input})
+
+    response = client.responses.create(
+        model="gpt-5-nano",
+        input=conversation
+    )
+
+    reply = response.output_text
+
+    # Add assistant reply to history
+    conversation.append({"role": "assistant", "content": reply})
+
+    print("Bot:", reply)
