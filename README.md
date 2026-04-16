@@ -7,7 +7,7 @@ This is my course repository for OIM3640.
 - Name: Manav Verma
 - Concentration: Finance 
 
-## Projects
+## Mini Projects
 
 - **Project 1 - Casino Game Simulator**  
   https://github.com/mverma103/oim3640/tree/main/mini_projects/project1  
