@@ -6,3 +6,13 @@ This is my course repository for OIM3640.
 
 - Name: Manav Verma
 - Concentration: Finance 
+
+## Projects
+
+- **Project 1 - Casino Game Simulator**  
+  https://github.com/mverma103/oim3640/tree/main/mini_projects/project1  
+  A Python-based console application that simulates classic casino games such as coin flip, dice, and roulette. The project focuses on implementing core programming concepts including functions, loops, and conditional logic, while managing user interaction, betting systems, and game outcomes in a structured and modular way.
+
+- **Project 2 - Lyrics Text Analysis Tool**   
+  https://github.com/mverma103/oim3640/tree/main/mini_projects/project2  
+  A Python program that analyzes song lyrics by processing text data, removing noise (such as punctuation, stop words, and adlibs), and identifying meaningful patterns. The tool evaluates word frequency and vocabulary richness, and allows users to compare multiple songs to gain insights into lyrical style and complexity.
