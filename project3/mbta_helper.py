@@ -2,12 +2,14 @@ import requests
 import os
 from dotenv import load_dotenv
 
+
+# load the API keys from the .env file
 load_dotenv()
 
 MAPBOX_API_KEY = os.getenv('MAPBOX_API_KEY')
 MBTA_API_KEY = os.getenv('MBTA_API_KEY')
 
-
+# function to get the coordinates of a place using the Mapbox Geocoding API
 def get_coordinates(place_name):
     place_name = place_name.replace(" ", "%20")
 
@@ -24,7 +26,7 @@ def get_coordinates(place_name):
     else:
         return None
 
-
+# function to get the nearest MBTA station using the MBTA API
 def get_nearest_station(latitude, longitude):
     url = f"https://api-v3.mbta.com/stops?filter[latitude]={latitude}&filter[longitude]={longitude}&sort=distance&api_key={MBTA_API_KEY}"
 
@@ -38,7 +40,7 @@ def get_nearest_station(latitude, longitude):
     else:
         return None
 
-
+# simple function to show if the stop is wheelchair accessible, inaccessible, or if there is no information available
 def accessibility(s):
     if s == 1:
         return "Accessible"
@@ -49,7 +51,7 @@ def accessibility(s):
     else:
         return "Unknown"
 
-
+# main function to find the nearest MBTA stop and its accessibility status for a given place name
 def find_stop_near(place_name):
     coordinates = get_coordinates(place_name)
 
@@ -65,7 +67,7 @@ def find_stop_near(place_name):
     stop_name, wheelchair_accessible = stop_info
     return stop_name, accessibility(wheelchair_accessible)
 
-
+# main function to run the program in terminal
 def main():
     place_name = input("Enter a place name or address: ")
 
@@ -79,4 +81,5 @@ def main():
         print("Wheelchair accessible:", wheelchair_status)
 
 
-main()
+if __name__ == "__main__":
+    main()

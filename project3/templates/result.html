@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MBTA Result</title>
+</head>
+<body>
+    <h1>MBTA Stop Finder Result</h1>
+
+    <p><strong>Location entered:</strong> {{ place_name }}</p>
+
+    {% if error %}
+        <p style="color: red;"><strong>{{ error }}</strong></p>
+    {% else %}
+        <p><strong>Nearest stop:</strong> {{ stop_name }}</p>
+        <p><strong>Wheelchair accessible:</strong> {{ wheelchair_status }}</p>
+    {% endif %}
+
+    <a href="/">Search again</a>
+</body>
+</html>
