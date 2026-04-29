@@ -122,8 +122,53 @@ def print_stock_report(data):
 
 ## Milestone 1.5: simple valuations. want to allow user to input
 
-def pe_valuation(data, target_pe=25):
+def assumptions_for_valuation(data):
+    """ Prints the assumptions used for the simple valuation methods to help users understand the context of the implied prices"""
+    
+    sector = data["sector"]
+    revenue_growth = data["revenue_growth"]
+    operating_margin = data["operating_margin"]
+
+    # default assumptions:
+    target_pe = 20
+    target_ev_ebitda = 12
+
+    #sector based assumptions:
+    if sector == "Technology":
+        target_pe = 28
+        target_ev_ebitda = 18
+    elif sector == "Consumer Cyclical":
+        target_pe = 22
+        target_ev_ebitda = 13
+    elif sector == "Consumer Defensive":
+        target_pe = 18
+        target_ev_ebitda = 11
+    elif sector == "Healthcare":
+        target_pe = 25
+        target_ev_ebitda = 15
+    elif sector == "Energy":
+        target_pe = 12
+        target_ev_ebitda = 7
+    elif sector == "Financial Services":
+        target_pe = 13
+        target_ev_ebitda = 10
+
+        # growth/margin based adjustments:
+    if revenue_growth is not None and revenue_growth > 0.15:
+        target_pe += 4
+        if target_ev_ebitda is not None:
+            target_ev_ebitda += 2
+
+    if operating_margin is not None and operating_margin > 0.25:
+        target_pe += 3
+        if target_ev_ebitda is not None:
+            target_ev_ebitda += 2
+
+    return target_pe, target_ev_ebitda
+
+def pe_valuation(data, target_pe):
     """ Simple P/E valuation method to calculate an implied stock price based on net income, shares outstanding, and a target P/E ratio"""
+
     net_income = data["net_income"]
     shares = data["shares_outstanding"]
 
@@ -133,7 +178,7 @@ def pe_valuation(data, target_pe=25):
     return implied_price
 
 
-def ev_ebitda_valuation(data, target_multiple=15):
+def ev_ebitda_valuation(data, target_multiple):
     """ Simple EV/EBITDA valuation method to calculate an implied stock price based on EBITDA, debt, cash, shares outstanding, and a target EV/EBITDA multiple"""
     ebitda = data["ebitda"]
     debt = data["debt"] or 0
@@ -174,40 +219,71 @@ def calculate_upside(current_price, target_price):
 
 def print_simple_valuation(data):
     print("\n==============================")
-    print("SIMPLE VALUATION")
+    print("CONSERVATIVE VALUATION CASE")
 
-    pe_price = pe_valuation(data, target_pe=25)
-    ev_ebitda_price = ev_ebitda_valuation(data, target_multiple=15)
+    target_pe, target_ev_ebitda = assumptions_for_valuation(data)
+
+    pe_price = pe_valuation(data, target_pe)
+
+    if target_ev_ebitda is None:
+        ev_ebitda_price = None
+    else:
+        ev_ebitda_price = ev_ebitda_valuation(data, target_ev_ebitda)
+
     blended_target = get_blended_target(pe_price, ev_ebitda_price)
     upside = calculate_upside(data["current_price"], blended_target)
 
-    print(f"P/E Implied Price: {format_price(pe_price)}")
-    print(f"EV/EBITDA Implied Price: {format_price(ev_ebitda_price)}")
-    print(f"Blended Target Price: {format_price(blended_target)}")
-    print(f"Upside/Downside: {format_percent(upside)}")
+    print(f"Current P/E: {data['pe_ratio']}")
+    print(f"Conservative P/E Assumption: {target_pe}x")
+
+    print(f"Current EV/EBITDA: {data['ev_to_ebitda']}")
+
+    if target_ev_ebitda is None:
+        print("Conservative EV/EBITDA Assumption: Not used for this sector")
+    else:
+        print(f"Conservative EV/EBITDA Assumption: {target_ev_ebitda}x")
+
+    print(f"P/E Conservative Implied Price: {format_price(pe_price)}")
+    print(f"EV/EBITDA Conservative Implied Price: {format_price(ev_ebitda_price)}")
+    print(f"Blended Conservative Value: {format_price(blended_target)}")
+    print(f"Implied Upside/Downside vs. Current Price: {format_percent(upside)}")
 
 
 # helper function to run the simple valuation and return results as a tuple, important for AI API integration in next milestone
 def get_simple_valuation_results(data):
-    pe_price = pe_valuation(data, target_pe=25)
-    ev_ebitda_price = ev_ebitda_valuation(data, target_multiple=15)
+    target_pe, target_ev_ebitda = assumptions_for_valuation(data)
+
+    pe_price = pe_valuation(data, target_pe)
+
+    if target_ev_ebitda is None:
+        ev_ebitda_price = None
+    else:
+        ev_ebitda_price = ev_ebitda_valuation(data, target_ev_ebitda)
+
     blended_target = get_blended_target(pe_price, ev_ebitda_price)
     upside = calculate_upside(data["current_price"], blended_target)
 
-    return pe_price, ev_ebitda_price, blended_target, upside
+    return target_pe, target_ev_ebitda, pe_price, ev_ebitda_price, blended_target, upside
 
 # OpenAI API SECTION - used AI to help with this part of the code
 
-def generate_ai_memo(data):
-    """ Generates an equity research memo using the OpenAI API based on the provided stock data and simple valuation results"""
+def generate_full_ai_analysis(data):
+    """Generates a full equity research report including memo + bull/base/bear in ONE API call"""
 
-    pe_price, ev_ebitda_price, blended_target, upside = get_simple_valuation_results(data)
+    target_pe, target_ev_ebitda, pe_price, ev_ebitda_price, blended_target, upside = get_simple_valuation_results(data)
 
     prompt = f"""
-    Write a concise equity research memo for {data['ticker']}.
+    Write a detailed equity research report for {data['ticker']}.
 
-    Focus on insights, trends, and implications rather than repeating raw numbers. Use the provided data to support your analysis, but do not simply restate it. Instead, interpret what the data means for the company's business prospects and stock valuation.
+    IMPORTANT:
+    - Focus on insights, trends, and implications (not just repeating numbers)
+    - Use the data provided but interpret it
+    - Do NOT make up data
+    - Keep it professional, like an equity research analyst
 
+    ----------------------------
+    COMPANY DATA
+    ----------------------------
     Company: {data['name']}
     Sector: {data['sector']}
     Industry: {data['industry']}
@@ -224,77 +300,65 @@ def generate_ai_memo(data):
     EV/EBITDA: {data['ev_to_ebitda']}
     Price/Sales: {data['price_to_sales']}
 
-    Simple valuation outputs:
-    P/E implied price: {pe_price}
-    EV/EBITDA implied price: {ev_ebitda_price}
-    Blended target price: {blended_target}
-    Upside/downside: {upside}
+    ----------------------------
+    CONSERVATIVE VALUATION CASE
+    ----------------------------
+    Current P/E: {data['pe_ratio']}
+    Conservative P/E Assumption: {target_pe}
+    P/E Implied Price: {pe_price}
 
-    Business summary:
+    Current EV/EBITDA: {data['ev_to_ebitda']}
+    Conservative EV/EBITDA Assumption: {target_ev_ebitda}
+    EV/EBITDA Implied Price: {ev_ebitda_price}
+
+    Blended Conservative Value: {blended_target}
+    Implied Upside/Downside: {upside}
+
+    These are conservative estimates — NOT exact price targets.
+
+    ----------------------------
+    BUSINESS SUMMARY
+    ----------------------------
     {data['summary']}
 
-    Structure the memo with these sections:
+    ----------------------------
+    OUTPUT FORMAT
+    ----------------------------
+
+    Investment Memo:
+
     1. Business Overview
+    (high-level summary of company and positioning)
+
     2. Financial Analysis
+    (growth, margins, profitability insights)
+
     3. Valuation View
+    (compare conservative valuation vs current market)
+
     4. Key Risks
+    (2-4 real risks)
+
     5. Final Recommendation
+    (Buy / Hold / Sell with reasoning)
 
-    Keep it professional, concise, and written like an equity research analyst.
-    Do not make up data that was not provided.
-    """
+    ----------------------------
 
-    response = client.chat.completions.create(
-        model="gpt-5-nano",
-        messages=[
-            {
-                "role": "system",
-                "content": "You are a careful equity research analyst. Use only the data provided and avoid making unsupported claims."
-            },
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ]
-    )
-
-    return response.choices[0].message.content
-
-def generate_bull_base_bear(data):
-    """ Generates a bull, base, and bear case analysis using the OpenAI API based on the provided stock data and simple valuation results"""  
-
-    pe_price, ev_ebitda_price, blended_target, upside = get_simple_valuation_results(data)
-
-    prompt = f"""
-    Create a bull, base, and bear case analysis for {data['ticker']}.
-
-    Company: {data['name']}
-    Sector: {data['sector']}
-    Industry: {data['industry']}
-    Current Price: {data['current_price']}
-    Revenue Growth: {data['revenue_growth']}
-    Operating Margin: {data['operating_margin']}
-    Profit Margin: {data['profit_margin']}
-    Debt: {data['debt']}
-    Cash: {data['cash']}
-    P/E Ratio: {data['pe_ratio']}
-    EV/EBITDA: {data['ev_to_ebitda']}
-    Blended Target Price: {blended_target}
-    Upside/Downside: {upside}
-
-    Format exactly like this:
+    Bull / Base / Bear Case:
 
     Bull Case:
+    - 
     - 
 
     Base Case:
     - 
+    - 
 
     Bear Case:
     - 
+    - 
 
-    Keep each case to 2-3 bullets.
-    Do not make up financial data.
+    Keep analysis concise but insightful.
     """
 
     response = client.chat.completions.create(
@@ -302,7 +366,7 @@ def generate_bull_base_bear(data):
         messages=[
             {
                 "role": "system",
-                "content": "You are a balanced equity research analyst. Be objective and avoid hype."
+                "content": "You are a professional equity research analyst. Be analytical, structured, and realistic."
             },
             {
                 "role": "user",
@@ -312,6 +376,31 @@ def generate_bull_base_bear(data):
     )
 
     return response.choices[0].message.content
+
+def get_web_analysis(ticker):
+    """Runs the stock analysis and returns data for the Flask web app."""
+
+    data = get_stock_data(ticker)
+
+    if data["name"] is None:
+        return None
+
+    target_pe, target_ev_ebitda, pe_price, ev_ebitda_price, blended_target, upside = get_simple_valuation_results(data)
+
+    ai_analysis = generate_full_ai_analysis(data)
+
+    results = {
+        "data": data,
+        "target_pe": target_pe,
+        "target_ev_ebitda": target_ev_ebitda,
+        "pe_price": pe_price,
+        "ev_ebitda_price": ev_ebitda_price,
+        "blended_target": blended_target,
+        "upside": upside,
+        "ai_analysis": ai_analysis
+    }
+
+    return results
 
 
 def run_stock_analysis(ticker):
@@ -347,4 +436,5 @@ def main():
 
         run_stock_analysis(ticker)
 
-main()
+if __name__ == "__main__":
+    main()

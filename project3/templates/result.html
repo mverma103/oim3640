@@ -2,19 +2,53 @@
 <html>
 <head>
     <title>MBTA Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
 </head>
 <body>
-    <h1>MBTA Stop Finder Result</h1>
+    <div class="container">
+        <h1>MBTA Stop Finder Result</h1>
 
-    <p><strong>Location entered:</strong> {{ place_name }}</p>
+        <p><strong>Location entered:</strong> {{ place_name }}</p>
 
-    {% if error %}
-        <p style="color: red;"><strong>{{ error }}</strong></p>
-    {% else %}
-        <p><strong>Nearest stop:</strong> {{ stop_name }}</p>
-        <p><strong>Wheelchair accessible:</strong> {{ wheelchair_status }}</p>
-    {% endif %}
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% else %}
+            <div class="result-box">
+                <p><strong>Nearest stop:</strong> {{ stop_name }}</p>
+                <p><strong>Wheelchair accessible:</strong> {{ wheelchair_status }}</p>
+            </div>
 
-    <a href="/">Search again</a>
+            <div id="map"></div>
+
+            <script>
+                mapboxgl.accessToken = "{{ mapbox_token }}";
+
+                const userLocation = [{{ user_lon }}, {{ user_lat }}];
+                const stopLocation = [{{ stop_lon }}, {{ stop_lat }}];
+
+                const map = new mapboxgl.Map({
+                    container: "map",
+                    style: "mapbox://styles/mapbox/streets-v12",
+                    center: stopLocation,
+                    zoom: 14
+                });
+
+                new mapboxgl.Marker({ color: "blue" })
+                    .setLngLat(userLocation)
+                    .setPopup(new mapboxgl.Popup().setText("Your searched location"))
+                    .addTo(map);
+
+                new mapboxgl.Marker({ color: "red" })
+                    .setLngLat(stopLocation)
+                    .setPopup(new mapboxgl.Popup().setText("Nearest MBTA stop: {{ stop_name }}"))
+                    .addTo(map);
+            </script>
+        {% endif %}
+
+        <a href="/" class="back-link">Search again</a>
+    </div>
 </body>
 </html>

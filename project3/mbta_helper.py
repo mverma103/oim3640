@@ -34,9 +34,13 @@ def get_nearest_station(latitude, longitude):
     data = response.json()
 
     if data['data']:
-        nearest_station = data['data'][0]['attributes']['name']
-        wheelchair_accessible = data['data'][0]['attributes']['wheelchair_boarding']
-        return nearest_station, wheelchair_accessible
+        stop = data['data'][0]
+        nearest_station = stop['attributes']['name']
+        wheelchair_accessible = stop['attributes']['wheelchair_boarding']
+        stop_latitude = stop['attributes']['latitude']
+        stop_longitude = stop['attributes']['longitude']
+
+        return nearest_station, wheelchair_accessible, stop_latitude, stop_longitude
     else:
         return None
 
@@ -64,8 +68,10 @@ def find_stop_near(place_name):
     if stop_info is None:
         return None
 
-    stop_name, wheelchair_accessible = stop_info
-    return stop_name, accessibility(wheelchair_accessible)
+    stop_name, wheelchair_accessible, stop_latitude, stop_longitude = stop_info
+
+    return stop_name, accessibility(wheelchair_accessible), latitude, longitude, stop_latitude, stop_longitude
+
 
 # main function to run the program in terminal
 def main():

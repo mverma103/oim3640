@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Stock Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>AI Stock Analysis Tool</h1>
+        <p>Enter a stock ticker to generate a financial summary, conservative valuation case, and AI investment memo.</p>
+        <p><small>(Please allow a minute or two for the AI analysis to complete)</small></p>
+        <p><small>This information is for educational purposes only and should not be considered financial advice.</small></p>
+
+        <form action="/analyze" method="POST">
+            <input type="text" name="ticker" placeholder="Example: AAPL, MSFT, NVDA" required>
+            <button type="submit">Analyze Stock</button>
+        </form>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+    </div>
+</body>
+</html>
